@@ -26,6 +26,24 @@ class CalculatorSpec extends Specification {
         println "<-- CLEANUP (after each test)"
     }
 
+    def "save system environment versions to file"() {
+        when:
+        def spockVer = spock.lang.Specification.package.implementationVersion
+        def groovyVer = GroovySystem.version
+        def javaVer = System.getProperty("java.version")
+
+        def output = """
+        Spock version: $spockVer
+        Groovy version: $groovyVer
+        Java version: $javaVer
+        """.stripIndent().trim()
+
+        new File("build/system-info.txt").text = output
+
+        then:
+        noExceptionThrown()
+    }
+
     def "should add two numbers"() {
         expect:
         calculator.add(2, 3) == 5
@@ -53,6 +71,11 @@ class CalculatorSpec extends Specification {
         then:
         def e = thrown(ArithmeticException)
         e.message == "Cannot divide by zero"
+    }
+
+    def "demonstrate shared object and lifecycle hooks"() {
+        expect:
+        sharedCalculator.multiply(2, 5) == 10
     }
 
     @Unroll
@@ -98,27 +121,21 @@ class CalculatorSpec extends Specification {
             4 | 1 || 4
         }
 
+    @Unroll
+    def "stubbed multiply (no interaction check): #a * #b = #expected"() {
+        given:
+        def service = Stub(MathService) {
+            multiply(_, _) >> { args -> args[0] * args[1] }
+        }
+        def calc = new Calculator(service: service)
 
-    def "save system environment versions to file"() {
-        when:
-        def spockVer = spock.lang.Specification.package.implementationVersion
-        def groovyVer = GroovySystem.version
-        def javaVer = System.getProperty("java.version")
-
-        def output = """
-        Spock version: $spockVer
-        Groovy version: $groovyVer
-        Java version: $javaVer
-        """.stripIndent().trim()
-
-        new File("build/system-info.txt").text = output
-
-        then:
-        noExceptionThrown()
-    }
-
-    def "demonstrate shared object and lifecycle hooks"() {
         expect:
-        sharedCalculator.multiply(2, 5) == 10
+        calc.safeMultiply(a, b) == expected
+
+        where:
+        a | b || expected
+        1 | 1 || 1
+        5 | 0 || 0
+        3 | 7 || 21
     }
 }
