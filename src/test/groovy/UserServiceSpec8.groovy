@@ -1,9 +1,9 @@
 import spock.lang.*
 import spock.util.concurrent.PollingConditions
-// import java.util.concurrent.*
+import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-class UserServiceSpec6 extends Specification {
+class UserServiceSpec8 extends Specification {
 
     def "should send confirmation email when registering"() {
         given:
@@ -177,5 +177,68 @@ class UserServiceSpec6 extends Specification {
         a << (1..3).collect { rng.nextInt(10) }
         b << (1..3).collect { rng.nextInt(10) }
         sum = a + b
+    }
+
+    def "should write and read from temporary file"() {
+        given:
+        File tmp = File.createTempFile("spock", ".txt")
+        tmp.text = "Hello Spock!"
+
+        when:
+        def content = tmp.text
+
+        then:
+        content == "Hello Spock!"
+
+        cleanup:
+        tmp.delete()
+    }
+
+    def "should append multiple lines to a file"() {
+        given:
+        File tmp = File.createTempFile("log", ".log")
+        tmp << "Line 1\n"
+        tmp << "Line 2\n"
+
+        when:
+        def lines = tmp.readLines()
+
+        then:
+        lines.size() == 2
+        lines[0] == "Line 1"
+        lines[1] == "Line 2"
+
+        cleanup:
+        tmp.delete()
+    }
+
+    def "should compare two files with identical content"() {
+        given:
+        File file1 = File.createTempFile("compare1", ".txt")
+        File file2 = File.createTempFile("compare2", ".txt")
+        file1.text = "Same content"
+        file2.text = "Same content"
+
+        expect:
+        file1.text == file2.text
+
+        cleanup:
+        file1.delete()
+        file2.delete()
+    }
+
+    def "should detect difference in file content"() {
+        given:
+        File file1 = File.createTempFile("diff1", ".txt")
+        File file2 = File.createTempFile("diff2", ".txt")
+        file1.text = "Hello"
+        file2.text = "World"
+
+        expect:
+        file1.text != file2.text
+
+        cleanup:
+        file1.delete()
+        file2.delete()
     }
 }
