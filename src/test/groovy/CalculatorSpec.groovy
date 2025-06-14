@@ -1,26 +1,29 @@
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class CalculatorSpec extends Specification {
 
-    def calculator = new Calculator()
+    @Shared
+    def sharedCalculator = new Calculator()
 
-    def "save system environment versions to file"() {
-        when:
-        def spockVer = spock.lang.Specification.package.implementationVersion
-        def groovyVer = GroovySystem.version
-        def javaVer = System.getProperty("java.version")
+    def calculator
 
-        def output = """
-        Spock version: $spockVer
-        Groovy version: $groovyVer
-        Java version: $javaVer
-        """.stripIndent().trim()
+    def setupSpec() {
+        println "==> SETUP SPEC (once per class)"
+    }
 
-        new File("build/system-info.txt").text = output
+    def cleanupSpec() {
+        println "==> CLEANUP SPEC (once per class)"
+    }
 
-        then:
-        noExceptionThrown()
+    def setup() {
+        println "--> SETUP (before each test)"
+        calculator = new Calculator()
+    }
+
+    def cleanup() {
+        println "<-- CLEANUP (after each test)"
     }
 
     def "should add two numbers"() {
@@ -48,7 +51,8 @@ class CalculatorSpec extends Specification {
         calculator.divide(10, 0)
 
         then:
-        thrown(ArithmeticException)
+        def e = thrown(ArithmeticException)
+        e.message == "Cannot divide by zero"
     }
 
     @Unroll
@@ -62,5 +66,28 @@ class CalculatorSpec extends Specification {
         0 | 0 || 0
         5 | 5 || 10
         -3 | 3 || 0
+    }
+
+    def "save system environment versions to file"() {
+        when:
+        def spockVer = spock.lang.Specification.package.implementationVersion
+        def groovyVer = GroovySystem.version
+        def javaVer = System.getProperty("java.version")
+
+        def output = """
+        Spock version: $spockVer
+        Groovy version: $groovyVer
+        Java version: $javaVer
+        """.stripIndent().trim()
+
+        new File("build/system-info.txt").text = output
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "demonstrate shared object and lifecycle hooks"() {
+        expect:
+        sharedCalculator.multiply(2, 5) == 10
     }
 }
