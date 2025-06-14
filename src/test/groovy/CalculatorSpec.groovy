@@ -68,6 +68,37 @@ class CalculatorSpec extends Specification {
         -3 | 3 || 0
     }
 
+    @Unroll
+    def "should subtract multiple pairs: #a - #b = #result"() {
+        expect:
+        calculator.subtract(a, b) == result
+
+        where:
+        a | b || result
+        1 | 2 || -1
+        0 | 0 || 0
+        5 | 5 || 0
+        -3 | 3 || -6
+    }
+
+        @Unroll
+        def "mocked multiply: #a * #b = #result"() {
+            given:
+            def service = Mock(MathService)
+            service.multiply(a, b) >> result
+            def calc = new Calculator(service: service)
+
+            expect:
+            calc.safeMultiply(a, b) == result
+
+            where:
+            a | b || result
+            2 | 3 || 6
+            0 | 5 || 0
+            4 | 1 || 4
+        }
+
+
     def "save system environment versions to file"() {
         when:
         def spockVer = spock.lang.Specification.package.implementationVersion
