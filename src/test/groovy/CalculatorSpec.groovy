@@ -138,4 +138,39 @@ class CalculatorSpec extends Specification {
         5 | 0 || 0
         3 | 7 || 21
     }
+
+    def "should skip multiply call when zero involved"() {
+        given:
+        def service = Mock(MathService)
+        def calc = new Calculator(service: service)
+
+        when:
+        def result = calc.safeMultiply(0, 10)
+
+        then:
+        result == 0
+        0 * service._  // no methods on service should be called
+    }
+
+// Poprawiony test
+    def "should multiply all numbers in the list"() {
+        given:
+        def service = Mock(MathService)
+        def calc = new Calculator(service: service)
+
+        when:
+        def result = calc.multiplyList([2, 5])
+
+        then:
+        // 1. Pierwsze wywołanie: result=1, n=2 -> service.multiply(1, 2)
+        //    Stubbing: niech zwróci 2 (1*2)
+        1 * service.multiply(1, 2) >> 2
+
+        // 2. Drugie wywołanie: result=2, n=5 -> service.multiply(2, 5)
+        //    Stubbing: niech zwróci 10 (2*5)
+        1 * service.multiply(2, 5) >> 10
+
+        result == 10
+    }
+
 }
