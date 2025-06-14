@@ -104,22 +104,22 @@ class CalculatorSpec extends Specification {
         -3 | 3 || -6
     }
 
-        @Unroll
-        def "mocked multiply: #a * #b = #result"() {
-            given:
-            def service = Mock(MathService)
-            service.multiply(a, b) >> result
-            def calc = new Calculator(service: service)
+    @Unroll
+    def "mocked multiply: #a * #b = #result"() {
+        given:
+        def service = Mock(MathService)
+        service.multiply(a, b) >> result
+        def calc = new Calculator(service: service)
 
-            expect:
-            calc.safeMultiply(a, b) == result
+        expect:
+        calc.safeMultiply(a, b) == result
 
-            where:
-            a | b || result
-            2 | 3 || 6
-            0 | 5 || 0
-            4 | 1 || 4
-        }
+        where:
+        a | b || result
+        2 | 3 || 6
+        0 | 5 || 0
+        4 | 1 || 4
+    }
 
     @Unroll
     def "stubbed multiply (no interaction check): #a * #b = #expected"() {
