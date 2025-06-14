@@ -5,6 +5,24 @@ class CalculatorSpec extends Specification {
 
     def calculator = new Calculator()
 
+    def "save system environment versions to file"() {
+        when:
+        def spockVer = spock.lang.Specification.package.implementationVersion
+        def groovyVer = GroovySystem.version
+        def javaVer = System.getProperty("java.version")
+
+        def output = """
+        Spock version: $spockVer
+        Groovy version: $groovyVer
+        Java version: $javaVer
+        """.stripIndent().trim()
+
+        new File("build/system-info.txt").text = output
+
+        then:
+        noExceptionThrown()
+    }
+
     def "should add two numbers"() {
         expect:
         calculator.add(2, 3) == 5
@@ -44,23 +62,5 @@ class CalculatorSpec extends Specification {
         0 | 0 || 0
         5 | 5 || 10
         -3 | 3 || 0
-    }
-
-    def "save system environment versions to file"() {
-        when:
-        def spockVer = spock.lang.Specification.package.implementationVersion
-        def groovyVer = GroovySystem.version
-        def javaVer = System.getProperty("java.version")
-
-        def output = """
-        Spock version: $spockVer
-        Groovy version: $groovyVer
-        Java version: $javaVer
-        """.stripIndent().trim()
-
-        new File("build/system-info.txt").text = output
-
-        then:
-        noExceptionThrown()
     }
 }
