@@ -173,4 +173,95 @@ class CalculatorSpec extends Specification {
         result == 10
     }
 
+    @Unroll
+    def "should multiply all elements of #numbers to get #expected"() {
+        given:
+        def service = Mock(MathService) {
+            multiply(_, _) >> { args -> args[0] * args[1] }
+        }
+        def calc = new Calculator(service: service)
+
+        when:
+        def result = calc.multiplyList(numbers)
+
+        then:
+        result == expected
+
+        where:
+        numbers        || expected
+        [2, 5]         || 10
+        [1, 1, 1]      || 1
+        [3, 3, 3]      || 27
+        [7]            || 7
+        []             || 1
+        [2, 0, 5]      || 0
+    }
+
+
+    @Unroll
+    def "multiplyList of #numbers gives #expected and calls multiply() #calls time(s)"() {
+        given: "a mock service and a calculator"
+        // W bloku `given` TYLKO tworzymy obiekty.
+        // NIE definiujemy tutaj zachowania mocka.
+        MathService service = Mock()
+        def calc = new Calculator(service: service)
+
+        when: "multiplyList is called"
+        def result = calc.multiplyList(numbers)
+
+        then: "the result is correct and the service was called the expected number of times"
+        // W bloku `then` łączymy weryfikację liczby wywołań ze stubowaniem odpowiedzi.
+        // To jest kluczowa zmiana!
+        calls * service.multiply(_, _) >> { int a, int b -> a * b }
+
+        and: "the final result is as expected"
+        result == expected
+
+        where: "various inputs are tested"
+        numbers        | expected | calls
+        [2, 5]         | 10       | 2
+        [1, 2, 3]      | 6        | 3
+        [7]            | 7        | 1
+        []             | 1        | 0
+        [3, 0, 5]      | 0        | 1
+        [10, 20]       | 200      | 2
+    }
+
+    @Unroll
+    def "multiplyList of #numbers gives #expected (Stub version)"() {
+        given: "a stubbed MathService and a Calculator"
+        MathService service = Stub()
+        service.multiply(_, _) >> { int a, int b -> a * b }
+        def calc = new Calculator(service: service)
+
+        expect: "result matches expected outcome"
+        calc.multiplyList(numbers) == expected
+
+        where:
+        numbers        | expected
+        [2, 5]         | 10
+        [1, 2, 3]      | 6
+        [7]            | 7
+        []             | 1
+        [3, 0, 5]      | 0
+        [10, 20]       | 200
+    }
+    @Unroll
+    def "multiplyList1 of #numbers gives #expected (Stub version)"() {
+        given:
+        def service = Stub(MathService)
+        service.multiply(_, _) >> { a, b -> a * b }
+        def calc = new Calculator(service: service)
+
+        expect:
+        calc.multiplyList(numbers) == expected
+
+        where:
+        numbers     | expected
+        [2, 3]      | 6
+        [1, 1, 1]   | 1
+        [5]         | 5
+    }
+
+
 }
