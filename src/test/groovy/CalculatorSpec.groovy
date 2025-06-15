@@ -246,6 +246,7 @@ class CalculatorSpec extends Specification {
         [3, 0, 5]      | 0
         [10, 20]       | 200
     }
+
     @Unroll
     def "multiplyList1 of #numbers gives #expected (Stub version)"() {
         given:
@@ -262,6 +263,5 @@ class CalculatorSpec extends Specification {
         [1, 1, 1]   | 1
         [5]         | 5
     }
-
 
 }
