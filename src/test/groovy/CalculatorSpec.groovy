@@ -264,4 +264,24 @@ class CalculatorSpec extends Specification {
         [5]         | 5
     }
 
+    @Unroll
+    def "multiplyList of #numbers gives #expected using Stub"() {
+        given:
+        def service = Stub(MathService)
+        service.multiply(_, _) >> { a, b -> a * b }
+        def calc = new Calculator(service: service)
+
+        expect:
+        calc.multiplyList(numbers) == expected
+
+        where:
+        numbers         | expected
+        [2, 3]          | 6       // 1*2=2, 2*3=6
+        [1, 2, 3, 4]    | 24      // 1*1=1 → *2=2 → *3=6 → *4=24
+        [10]            | 10
+        []              | 1       // neutralny element mnożenia
+        [3, 0, 9]       | 0       // zera zawsze zerują
+        [5, 5]          | 25
+    }
+
 }
