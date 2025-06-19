@@ -7,6 +7,9 @@ Jego zachowanie definiujesz od zera.
 Spy:
 Kiedy tworzysz Spy(realImpl), tworzysz obiekt, który opakowuje prawdziwy obiekt (realImpl).
 Domyślnie, każde wywołanie metody na Spy jest przekazywane do prawdziwego obiektu (realImpl.multiply(...)).
+W Spocku jest to klasyczny przypadek, w którym najlepiej użyć Spy na testowanej klasie,
+aby móc "podmienić" zachowanie metody pomocniczej.
+
 
 ------------------------------------------------------------------------------------------------------------
 

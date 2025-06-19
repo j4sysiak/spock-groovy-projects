@@ -8,21 +8,15 @@ class Calculator {
     MathService service
 
     int multiplyList(List<Integer> numbers) {
+        if (numbers == null || numbers.isEmpty()) return 1
         int result = 1
-        // Poprawiona logika, aby faktycznie mnożyć elementy listy
-        //numbers.each { n -> result = safeMultiply(result, n) }   // example: [2, 3]
-
-        for (int i = 0; i < numbers.size(); i++) {
-            result = safeMultiply(result, numbers[i])
-        }
-
-        return result  // example: 6
+        numbers.each { n -> result = safeMultiply(result, n) }
+        return result
     }
 
-    int safeMultiply(int a, int b) {
-        if (a == 0 || b == 0) {
-            throw new IllegalArgumentException("Illegal multiply 0")
-        }
+    private int safeMultiply(int a, int b) {
+        // Ta metoda używa serwisu, więc musimy ją zamockować
+        // jeśli nie chcemy, aby była wywoływana
         return service.multiply(a, b)
     }
 
