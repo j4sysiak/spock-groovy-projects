@@ -1,0 +1,39 @@
+ Oto krótkie i konkretne podsumowanie różnic między Mock, Stub, Spy – z myślą o trzech klasach: MockSpec, StubSpec, SpySpec.
+
+✅ 1. Mock – weryfikacja + pełna kontrola interakcji
+Użycie: Mock(MathService)
+
+Zachowanie: nic się nie dzieje domyślnie – musisz wszystko >>
+
+Można asercjonować: ile razy metoda została wywołana
+
+Do czego: testowanie interakcji (czy coś zostało wywołane i ile razy)
+
+Przykład:
+1 * service.multiply(2, 3) >> 6
+
+
+✅ 2. Stub – tylko wartości zwrotne, brak weryfikacji
+Użycie: Stub(MathService)
+
+Zachowanie: automatycznie odpowiada na metody, ale nie sprawdza interakcji
+
+Nie sprawdzisz: ile razy została wywołana dana metoda
+
+Do czego: testowanie funkcjonalności, nie zachowania
+
+Przykład:
+service.multiply(_, _) >> { a, b -> a * b }
+
+
+✅ 3. Spy – realny obiekt z opcjonalnym nadpisaniem
+Użycie: Spy(new MathServiceImpl())
+
+Zachowanie: wykonuje prawdziwy kod klasy
+
+Możesz: nadpisać tylko wybrane wywołania
+
+Do czego: testowanie logiki + warunkowe kontrolowanie zachowania
+
+Przykład:
+1 * spy.multiply(2, 3) >> 999 // tylko to nadpisuje, reszta działa realnie
