@@ -315,7 +315,31 @@ class CalculatorSpec extends Specification {
         [5, 5]          | 25       | 2*/
     }
 
+    @Unroll
+    def "multiplyList #numbers zwraca #expected, gdzie Spy nadpisuje tylko multiply(2, 3)"() {
+        given: "rzeczywista implementacja + Spy"
+        def realService = new MathServiceImpl()
+        def spyService = Spy(realService)
+        def calc = new Calculator(service: spyService)
 
+        when: "uruchamiamy multiplyList(...)"
+        def result = calc.multiplyList(numbers)
 
+        then: "jeśli multiply(2, 3), to Spy zwraca 999"
+        if (numbers == [2, 3]) {
+            1 * spyService.multiply(2, 3) >> 999
+        } else {
+            // Zamiast 0 * _, nie weryfikujemy nic – pozwalamy spyowi działać
+            noExceptionThrown()
+        }
+
+        and: "sprawdzamy wynik końcowy"
+        result == expected
+
+        where:
+        numbers     | expected
+        [2, 3]      | 999      // Spy nadpisuje multiply(2, 3)
+        [3, 4]      | 12       // działa prawdziwe mnożenie
+    }
 
 }

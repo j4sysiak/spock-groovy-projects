@@ -7,18 +7,22 @@ class Calculator {
 
     MathService service
 
+    int multiplyList(List<Integer> numbers) {
+        int result = 1
+        // Poprawiona logika, aby faktycznie mnożyć elementy listy
+        numbers.each { n -> result = safeMultiply(result, n) }   // example: [2, 3]
+
+//        for (int i = 0; i < numbers.size(); i++) {
+//            result = safeMultiply(result, numbers[i])
+//        }
+
+        return result  // example: 6
+    }
+
     int safeMultiply(int a, int b) {
         if (a == 0 || b == 0) return 0
         return service.multiply(a, b)
     }
-
-    int multiplyList(List<Integer> numbers) {
-        int result = 1
-        // Poprawiona logika, aby faktycznie mnożyć elementy listy
-        numbers.each { n -> result = safeMultiply(result, n) }
-        return result
-    }
-
 
     int add(int a, int b) {
         a + b
