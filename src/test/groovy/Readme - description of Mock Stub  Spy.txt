@@ -3,8 +3,12 @@ Kiedy tworzysz Mock(MathService) lub Stub(MathService), tworzysz całkowicie now
 który implementuje interfejs MathService.
 Jego zachowanie definiujesz od zera.
 
+Stub()
+    Bez weryfikacji interakcji
+    Skupia się na poprawnym wyniku (result == expected)
 
 Spy:
+Spy omija zepsuty mechanizm >>, ponieważ używa prawdziwej implementacji.
 Kiedy tworzysz Spy(realImpl), tworzysz obiekt, który opakowuje prawdziwy obiekt (realImpl).
 Domyślnie, każde wywołanie metody na Spy jest przekazywane do prawdziwego obiektu (realImpl.multiply(...)).
 W Spocku jest to klasyczny przypadek, w którym najlepiej użyć Spy na testowanej klasie,

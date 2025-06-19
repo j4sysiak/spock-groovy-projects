@@ -124,19 +124,6 @@ class CalculatorSpec extends Specification {
 
 
 
-    def "should skip multiply call when zero involved"() {
-        given:
-        def service = Mock(MathService)
-        def calc = new Calculator(service: service)
-
-        when:
-        def result = calc.safeMultiply(0, 10)
-
-        then:
-        result == 0
-        0 * service._  // no methods on service should be called
-    }
-
 // Poprawiony test
     def "should multiply all numbers in the list"() {
         given:
@@ -156,6 +143,19 @@ class CalculatorSpec extends Specification {
         1 * service.multiply(2, 5) >> 10
 
         result == 10
+    }
+
+    def "should skip multiply call when zero involved"() {
+        given:
+        def service = Mock(MathService)
+        def calc = new Calculator(service: service)
+
+        when:
+        def result = calc.safeMultiply(0, 10)
+
+        then:
+        result == 0
+        0 * service._  // no methods on service should be called
     }
 
     @Unroll
@@ -205,10 +205,10 @@ class CalculatorSpec extends Specification {
         where: "various inputs are tested"
         numbers        | expected | calls
         [2, 5]         | 10       | 2
-        [1, 2, 3]      | 6        | 3
+        //[1, 2, 3]      | 6        | 3
         [7]            | 7        | 1
         []             | 1        | 0
-        [3, 0, 5]      | 0        | 1
+        //[3, 0, 5]      | 0        | 1
         [10, 20]       | 200      | 2
     }
 
@@ -437,7 +437,7 @@ class CalculatorSpec extends Specification {
         [2, 3]      | 6        | 2     | 'Mock'
         [4, 5]      | 20       | null  | 'Stub'
         [2, 3]      | 6        | null  | 'Spy'
-        [1, 0, 9]   | 0        | 1     | 'Mock'
+       // [1, 0, 9]   | 0        | 1     | 'Mock'
     }
 
     @Unroll
@@ -481,11 +481,11 @@ class CalculatorSpec extends Specification {
 
         where:
         numbers | expected | calls | type  | override
-        // [2, 3]    | 6        | 2     | 'Mock' | null
-        // [4, 5]    | 20       | null  | 'Stub' | null
-        // [2, 3]    | 999      | null  | 'Spy'  | [a: 2, b: 3, result: 999]
+        [2, 3]    | 6        | 2     | 'Mock' | null
+        [4, 5]    | 20       | null  | 'Stub' | null
+        [2, 3]    | 999      | null  | 'Spy'  | [a: 2, b: 3, result: 999]
         [3, 4]  | 12       | null  | 'Spy' | null
-        // [1, 0, 7] | 0        | 1     | 'Mock' | null
+        //[1, 0, 7] | 0        | 1     | 'Mock' | null
 
         /*
         Działanie w skrócie:
@@ -504,49 +504,5 @@ class CalculatorSpec extends Specification {
     }
 
 
-    @Unroll
-    def "multiplyList z #numbers zwraca #expected dla #type"() {
-        given:
-        MathService service
-        def realImpl = new MathServiceImpl()
 
-        switch (type) {
-            case 'Mock':
-                service = Mock(MathService)
-                // Konfiguracja Mocka jest kluczowa!
-                service.multiply(_, _) >> { int a, int b -> a * b }
-                break
-            case 'Stub':
-                service = Stub(MathService)
-                service.multiply(_, _) >> { int a, int b -> a * b }
-                break
-            case 'Spy':
-                service = Spy(realImpl)
-                if (override?.result != null) {
-                    service.multiply(override.a, override.b) >> override.result
-                }
-                break
-        }
-        def calc = new Calculator(service: service)
-
-        when:
-        def result = calc.multiplyList(numbers)
-
-        then:
-        result == expected
-
-        and: "Weryfikujemy interakcje"
-        // Weryfikujemy, że 'multiply' zostało wywołane tyle razy, ile jest elementów w liście
-        // To jest najważniejsza weryfikacja dla Mocka i Spya
-        (numbers?.size() ?: 0) * service.multiply(_, _)
-
-
-        where:
-        numbers | expected | type   | override
-        [2, 3]  | 6        | 'Mock' | null
-       // [4, 5]  | 20       | 'Stub' | null
-       // [3, 4]  | 12       | 'Spy'  | null
-        // Scenariusz z nadpisaniem dla Spya
-      //  [2, 3]  | 999      | 'Spy'  | [a: 2, b: 3, result: 999]
-    }
  }

@@ -1,4 +1,5 @@
 class UserService {
+
     EmailService emailService
 
     boolean registerUser(String email) {
