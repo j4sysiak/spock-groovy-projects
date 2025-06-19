@@ -1,4 +1,16 @@
- Oto krótkie i konkretne podsumowanie różnic między Mock, Stub, Spy – z myślą o trzech klasach: MockSpec, StubSpec, SpySpec.
+Mock i Stub:
+Kiedy tworzysz Mock(MathService) lub Stub(MathService), tworzysz całkowicie nowy, "pusty" obiekt,
+który implementuje interfejs MathService.
+Jego zachowanie definiujesz od zera.
+
+
+Spy:
+Kiedy tworzysz Spy(realImpl), tworzysz obiekt, który opakowuje prawdziwy obiekt (realImpl).
+Domyślnie, każde wywołanie metody na Spy jest przekazywane do prawdziwego obiektu (realImpl.multiply(...)).
+
+------------------------------------------------------------------------------------------------------------
+
+Oto krótkie i konkretne podsumowanie różnic między Mock, Stub, Spy – z myślą o trzech klasach: MockSpec, StubSpec, SpySpec.
 
 ✅ 1. Mock – weryfikacja + pełna kontrola interakcji
 Użycie: Mock(MathService)

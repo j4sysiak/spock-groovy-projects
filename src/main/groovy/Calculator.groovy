@@ -10,17 +10,19 @@ class Calculator {
     int multiplyList(List<Integer> numbers) {
         int result = 1
         // Poprawiona logika, aby faktycznie mnożyć elementy listy
-        numbers.each { n -> result = safeMultiply(result, n) }   // example: [2, 3]
+        //numbers.each { n -> result = safeMultiply(result, n) }   // example: [2, 3]
 
-//        for (int i = 0; i < numbers.size(); i++) {
-//            result = safeMultiply(result, numbers[i])
-//        }
+        for (int i = 0; i < numbers.size(); i++) {
+            result = safeMultiply(result, numbers[i])
+        }
 
         return result  // example: 6
     }
 
     int safeMultiply(int a, int b) {
-        if (a == 0 || b == 0) return 0
+        if (a == 0 || b == 0) {
+            throw new IllegalArgumentException("Illegal multiply 0")
+        }
         return service.multiply(a, b)
     }
 
