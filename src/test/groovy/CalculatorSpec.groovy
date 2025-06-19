@@ -315,28 +315,6 @@ class CalculatorSpec extends Specification {
         [5, 5]          | 25       | 2*/
     }
 
-
-    @Unroll
-    def "multiplyList #numbers zwraca #expected (Spy bez override)"() {
-        given:
-        def spyService = Spy(MathServiceImpl)
-        def calc = new Calculator(service: spyService)
-
-        when:
-        def result = calc.multiplyList(numbers)
-
-        then:
-        result == expected
-
-        where:
-        numbers     | expected
-        [2, 3]      | 6        // 1 * 2 * 3 = 6
-        [3, 4]      | 12       // 1 * 3 * 4 = 12
-        []          | 1
-        [1, 0, 7]   | 0
-    }
-
-
     @Unroll
     def "multiplyList #numbers zwraca #expected, gdzie Spy nadpisuje tylko multiply(2, 3)"() {
         given: "rzeczywista implementacja + Spy"
@@ -364,4 +342,164 @@ class CalculatorSpec extends Specification {
         [3, 4]      | 12       // działa prawdziwe mnożenie
     }
 
-}
+
+    @Unroll
+    def "multiplyList #numbers zwraca #expected (Spy bez override)"() {
+        given:
+        def spyService = Spy(MathServiceImpl)
+        def calc = new Calculator(service: spyService)
+
+        when:
+        def result = calc.multiplyList(numbers)
+
+        then:
+        result == expected
+
+        where:
+        numbers     | expected
+        [2, 3]      | 6        // 1 * 2 * 3 = 6
+        [3, 4]      | 12       // 1 * 3 * 4 = 12
+        []          | 1
+        [1, 0, 7]   | 0
+    }
+
+    @Unroll
+    def "multiplyList #numbers zwraca #expected, z logowaniem multiply()"() {
+        given:
+        def realService = new MathServiceImpl() {
+            @Override
+            int multiply(int a, int b) {
+                println "Override multiply: $a * $b"
+                return a * b
+            }
+        }
+
+        def spyService = Spy(realService)
+        def calc = new Calculator(service: spyService)
+
+        when:
+        def result = calc.multiplyList(numbers)
+
+        then:
+        if (override != null) {
+            1 * spyService.multiply(override.a, override.b) >> override.result
+        }
+
+        and:
+        result == expected
+
+        where:
+        numbers     | expected | override
+        [2, 3]      | 999      | [a: 2, b: 3, result: 999] // nadpisujemy multiply(2, 3)
+        [3, 4]      | 12       | null                     // używa realnych multiply
+    }
+
+    @Unroll
+    def "multiplyList #numbers zwraca #expected dla #type"() {
+        given:
+        MathService service
+
+        // pełna kontrola nad ilością wywołań (calls * multiply(...))
+        if (type == 'Mock') {
+            service = Mock(MathService)
+            calls * service.multiply(_, _) >> { int a, int b -> a * b }
+        }
+
+        // brak weryfikacji wywołań, ale zwraca wynik
+        if (type == 'Stub') {
+            service = Stub(MathService)
+            service.multiply(_, _) >> { int a, int b -> a * b }
+        }
+
+        // 	wywołuje prawdziwą metodę (loguje multiply: a * b), ale można nadpisać @Override
+        if (type == 'Spy') {
+            def realImpl = new MathServiceImpl() {
+                @Override
+                int multiply(int a, int b) {
+                    println "🔢 multiply: $a * $b"
+                    return a * b
+                }
+            }
+            service = Spy(realImpl)
+        }
+
+        def calc = new Calculator(service: service)
+
+        when:
+        def result = calc.multiplyList(numbers)
+
+        then:
+        result == expected
+
+        where:
+        numbers     | expected | calls | type
+        [2, 3]      | 6        | 2     | 'Mock'
+        [4, 5]      | 20       | null  | 'Stub'
+        [2, 3]      | 6        | null  | 'Spy'
+        [1, 0, 9]   | 0        | 1     | 'Mock'
+    }
+
+    @Unroll
+    def "multiplyList #numbers zwraca #expected dla #type z override: #override"() {
+
+        given:
+        MathService service
+
+        if (type == 'Mock') {
+            service = Mock(MathService)
+            calls * service.multiply(_, _) >> { int a, int b -> a * b }
+        }
+
+        if (type == 'Stub') {
+            service = Stub(MathService)
+            service.multiply(_, _) >> { int a, int b -> a * b }
+        }
+
+        if (type == 'Spy') {
+            def realImpl = new MathServiceImpl() {
+                @Override
+                int multiply(int a, int b) {
+                    println "🔢 multiply: $a * $b"
+                    return a * b
+                }
+            }
+            service = Spy(realImpl)
+        }
+
+        def calc = new Calculator(service: service)
+
+        when:
+        def result = calc.multiplyList(numbers)
+
+        then:
+        if (type == 'Spy' && override != null) {
+            1 * service.multiply(override.a, override.b) >> override.result
+        }
+
+        and:
+        result == expected
+
+        where:
+        numbers | expected | calls | type  | override
+        // [2, 3]    | 6        | 2     | 'Mock' | null
+        // [4, 5]    | 20       | null  | 'Stub' | null
+        // [2, 3]    | 999      | null  | 'Spy'  | [a: 2, b: 3, result: 999]
+        [3, 4]  | 12       | null  | 'Spy' | null
+        // [1, 0, 7] | 0        | 1     | 'Mock' | null
+
+        /*
+        Działanie w skrócie:
+        type	        override	                     Co się stanie
+        Spy	            {a:2, b:3, result:999}	         tylko multiply(2, 3) zwróci 999
+        Spy	            null	                         działa prawdziwa metoda multiply()
+        Mock	        dowolne	                         działa wg calls * multiply(_, _) >> ...
+        Stub	        dowolne	                         działa zawsze multiply(_, _) >> a*b
+
+
+        type	calls	  Zachowanie
+        Mock	liczba	  pełna kontrola nad ilością wywołań (calls * multiply(...))
+        Stub	null	  brak weryfikacji wywołań, ale zwraca wynik
+        Spy	    null	  wywołuje prawdziwą metodę (loguje multiply: a * b), ale można nadpisać
+    }*/
+    }
+    }
