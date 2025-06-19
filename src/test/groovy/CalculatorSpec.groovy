@@ -315,6 +315,28 @@ class CalculatorSpec extends Specification {
         [5, 5]          | 25       | 2*/
     }
 
+
+    @Unroll
+    def "multiplyList #numbers zwraca #expected (Spy bez override)"() {
+        given:
+        def spyService = Spy(MathServiceImpl)
+        def calc = new Calculator(service: spyService)
+
+        when:
+        def result = calc.multiplyList(numbers)
+
+        then:
+        result == expected
+
+        where:
+        numbers     | expected
+        [2, 3]      | 6        // 1 * 2 * 3 = 6
+        [3, 4]      | 12       // 1 * 3 * 4 = 12
+        []          | 1
+        [1, 0, 7]   | 0
+    }
+
+
     @Unroll
     def "multiplyList #numbers zwraca #expected, gdzie Spy nadpisuje tylko multiply(2, 3)"() {
         given: "rzeczywista implementacja + Spy"
@@ -327,14 +349,14 @@ class CalculatorSpec extends Specification {
 
         then: "jeśli multiply(2, 3), to Spy zwraca 999"
         if (numbers == [2, 3]) {
-            1 * spyService.multiply(2, 3) >> 999
+             1 * spyService.multiply(2, 3) >> 999
         } else {
-            // Zamiast 0 * _, nie weryfikujemy nic – pozwalamy spyowi działać
-            noExceptionThrown()
+            // brak asercji interakcji
         }
 
-        and: "sprawdzamy wynik końcowy"
+        and:
         result == expected
+        noExceptionThrown()
 
         where:
         numbers     | expected
