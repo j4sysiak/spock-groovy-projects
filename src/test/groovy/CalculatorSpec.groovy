@@ -121,23 +121,7 @@ class CalculatorSpec extends Specification {
         4 | 1 || 4
     }
 
-    @Unroll
-    def "stubbed multiply (no interaction check): #a * #b = #expected"() {
-        given:
-        def service = Stub(MathService) {
-            multiply(_, _) >> { args -> args[0] * args[1] }
-        }
-        def calc = new Calculator(service: service)
 
-        expect:
-        calc.safeMultiply(a, b) == expected
-
-        where:
-        a | b || expected
-        1 | 1 || 1
-        5 | 0 || 0
-        3 | 7 || 21
-    }
 
     def "should skip multiply call when zero involved"() {
         given:
@@ -283,5 +267,53 @@ class CalculatorSpec extends Specification {
         [3, 0, 9]       | 0       // zera zawsze zerują
         [5, 5]          | 25
     }
+
+    @Unroll
+    def "stubbed multiply (no interaction check): #a * #b = #expected"() {
+        given:
+        def service = Stub(MathService) {
+            multiply(_, _) >> { args -> args[0] * args[1] }
+        }
+        def calc = new Calculator(service: service)
+
+        expect:
+        calc.safeMultiply(a, b) == expected
+
+        where:
+        a | b || expected
+        1 | 1 || 1
+        5 | 0 || 0
+        3 | 7 || 21
+    }
+
+    @Unroll
+    def "multiplyList #numbers zwraca #expected i wywołuje multiply() dokładnie #calls razy"() {
+        given:
+        def service = Mock(MathService)
+        def calc = new Calculator(service: service)
+
+        when:
+        def result = calc.multiplyList(numbers)
+
+        then:
+        if (calls > 0) {
+            calls * service.multiply(_, _) >> { int a, int b -> a * b }
+        } else {
+            0 * service.multiply(_, _)
+        }
+
+        result == expected
+
+        where:
+        numbers         | expected | calls
+        [2, 3]          | 6        | 2
+        [1, 2, 3, 4]    | 24       | 4
+        [10]            | 10       | 1
+        []              | 1        | 0
+        [3, 0, 9]       | 0        | 1
+        [5, 5]          | 25       | 2
+    }
+
+
 
 }
