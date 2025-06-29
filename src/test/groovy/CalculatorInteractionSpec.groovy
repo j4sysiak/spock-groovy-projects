@@ -4,6 +4,13 @@ import org.spockframework.mock.runtime.GroovyMockFactory // Importujemy potrzebn
 class CalculatorInteractionSpec extends Specification {
 
     def "sprawdzamy, czy kalkulator FAKTYCZNIE używa naszego mocka"() {
+        println "Klasa serwisu wewnątrz kalkulatora: "
+        given:
+        def mathServiceMock = Mock(MathService)
+
+    }
+    /*  nie uzywamy ...
+       def "sprawdzamy, czy kalkulator FAKTYCZNIE używa naszego mocka"() {
         given:
         def mathServiceMock = Mock(MathService)
         def calculator = new Calculator(service: mathServiceMock)
@@ -27,4 +34,6 @@ class CalculatorInteractionSpec extends Specification {
         // Na razie wynik nie jest ważny. Patrzymy na wydruk w konsoli.
         result == 6
     }
+     */
+
 }
