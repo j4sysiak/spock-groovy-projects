@@ -11,21 +11,19 @@ repositories {
 // === UŻYJ TEJ KONFIGURACJI DLA NOWOCZESNEGO PROJEKTU (SPOCK 2.x) ===
 // ======================================================================
 dependencies {
-    // --- TA LINIA JEST KLUCZOWA ---
-    // Mówi: "Potrzebuję Groovy do kompilacji i uruchomienia mojego GŁÓWNEGO kodu aplikacji"
     implementation 'org.codehaus.groovy:groovy-all:3.0.9'
 
-    // Zależności do testów (te już prawdopodobnie masz)
+    // Zależności testowe
     testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+
+    // Spock 2.x używa ByteBuddy do mockowania. Cglib nie jest już potrzebny.
+    // Poniższe zależności są często automatycznie dołączane przez spock-core,
+    // ale jawne ich dodanie może rozwiązać niektóre problemy w złożonych projektach.
+    // W Twoim prostym przypadku są one prawdopodobnie opcjonalne.
     testImplementation 'net.bytebuddy:byte-buddy:1.12.9'
     testImplementation 'org.objenesis:objenesis:3.3'
-    testImplementation 'cglib:cglib-nodep:3.3.0' // lub byte-buddy
-
-    // UWAGA: Nie potrzebujesz drugi raz dodawać `groovy-all` w `testImplementation`,
-    // ponieważ `testImplementation` automatycznie dziedziczy zależności z `implementation`.
-    // Jednak dodanie go nie zaszkodzi i czasem jest czytelniejsze.
 }
 
 application {
